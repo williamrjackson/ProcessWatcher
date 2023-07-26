@@ -1,1 +1,1 @@
-Process Watcher Tray Utility
+**Process Watcher Tray Utility**
