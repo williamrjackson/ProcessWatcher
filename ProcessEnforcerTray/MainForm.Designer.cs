@@ -1,6 +1,6 @@
-﻿namespace ProcessWatcherTray
+﻿namespace Wrj.ProcessEnforcerTray
 {
-    partial class Form1
+    partial class MainForm
     {
         /// <summary>
         /// Required designer variable.
@@ -29,79 +29,102 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
-            this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
-            this.button1 = new System.Windows.Forms.Button();
-            this.button2 = new System.Windows.Forms.Button();
-            this.listBox1 = new System.Windows.Forms.ListBox();
-            this.button3 = new System.Windows.Forms.Button();
+            this.fileDialog = new System.Windows.Forms.OpenFileDialog();
+            this.browseBtn = new System.Windows.Forms.Button();
+            this.removeButton = new System.Windows.Forms.Button();
+            this.processListBox = new System.Windows.Forms.ListBox();
+            this.scanButton = new System.Windows.Forms.Button();
+            this.launchOrderToggle = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // notifyIcon
             // 
             this.notifyIcon.Icon = ((System.Drawing.Icon)(resources.GetObject("notifyIcon.Icon")));
-            this.notifyIcon.Text = "Process Watcher";
+            this.notifyIcon.Text = "Process Enforcer";
             this.notifyIcon.MouseClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon_MouseClick);
             // 
-            // openFileDialog1
+            // fileDialog
             // 
-            this.openFileDialog1.DefaultExt = "exe";
+            this.fileDialog.DefaultExt = "exe";
             // 
-            // button1
+            // browseBtn
             // 
-            this.button1.Location = new System.Drawing.Point(550, 8);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 1;
-            this.button1.Text = "Browse...";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.browseBtn.Location = new System.Drawing.Point(825, 11);
+            this.browseBtn.Margin = new System.Windows.Forms.Padding(4);
+            this.browseBtn.Name = "browseBtn";
+            this.browseBtn.Size = new System.Drawing.Size(112, 33);
+            this.browseBtn.TabIndex = 1;
+            this.browseBtn.Text = "Browse...";
+            this.browseBtn.UseVisualStyleBackColor = true;
+            this.browseBtn.Click += new System.EventHandler(this.browseButton_Click);
             // 
-            // button2
+            // removeButton
             // 
-            this.button2.Location = new System.Drawing.Point(550, 43);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(75, 23);
-            this.button2.TabIndex = 3;
-            this.button2.Text = "Remove";
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
+            this.removeButton.Location = new System.Drawing.Point(825, 61);
+            this.removeButton.Margin = new System.Windows.Forms.Padding(4);
+            this.removeButton.Name = "removeButton";
+            this.removeButton.Size = new System.Drawing.Size(112, 33);
+            this.removeButton.TabIndex = 3;
+            this.removeButton.Text = "Remove";
+            this.removeButton.UseVisualStyleBackColor = true;
+            this.removeButton.Click += new System.EventHandler(this.removeButton_Click);
             // 
-            // listBox1
+            // processListBox
             // 
-            this.listBox1.FormattingEnabled = true;
-            this.listBox1.ItemHeight = 14;
-            this.listBox1.Location = new System.Drawing.Point(12, 15);
-            this.listBox1.Name = "listBox1";
-            this.listBox1.SelectionMode = System.Windows.Forms.SelectionMode.MultiSimple;
-            this.listBox1.Size = new System.Drawing.Size(531, 144);
-            this.listBox1.TabIndex = 4;
+            this.processListBox.FormattingEnabled = true;
+            this.processListBox.ItemHeight = 20;
+            this.processListBox.Location = new System.Drawing.Point(18, 21);
+            this.processListBox.Margin = new System.Windows.Forms.Padding(4);
+            this.processListBox.Name = "processListBox";
+            this.processListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiSimple;
+            this.processListBox.Size = new System.Drawing.Size(794, 204);
+            this.processListBox.TabIndex = 4;
             // 
-            // button3
+            // scanButton
             // 
-            this.button3.Location = new System.Drawing.Point(550, 133);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(75, 23);
-            this.button3.TabIndex = 5;
-            this.button3.Text = "Scan";
-            this.button3.UseVisualStyleBackColor = true;
-            this.button3.Click += new System.EventHandler(this.button3_Click);
+            this.scanButton.Location = new System.Drawing.Point(825, 190);
+            this.scanButton.Margin = new System.Windows.Forms.Padding(4);
+            this.scanButton.Name = "scanButton";
+            this.scanButton.Size = new System.Drawing.Size(112, 33);
+            this.scanButton.TabIndex = 5;
+            this.scanButton.Text = "Scan";
+            this.scanButton.UseVisualStyleBackColor = true;
+            this.scanButton.Click += new System.EventHandler(this.scanButton_Click);
             // 
-            // Form1
+            // launchOrderToggle
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 14F);
+            this.launchOrderToggle.AutoSize = true;
+            this.launchOrderToggle.Checked = true;
+            this.launchOrderToggle.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.launchOrderToggle.Enabled = false;
+            this.launchOrderToggle.Location = new System.Drawing.Point(18, 213);
+            this.launchOrderToggle.Name = "launchOrderToggle";
+            this.launchOrderToggle.Size = new System.Drawing.Size(192, 24);
+            this.launchOrderToggle.TabIndex = 6;
+            this.launchOrderToggle.Text = "Enforce Launch Order";
+            this.launchOrderToggle.UseVisualStyleBackColor = true;
+            this.launchOrderToggle.Visible = false;
+            this.launchOrderToggle.CheckedChanged += new System.EventHandler(this.launchOrderToggle_CheckedChanged);
+            // 
+            // MainForm
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(634, 168);
-            this.Controls.Add(this.button3);
-            this.Controls.Add(this.listBox1);
-            this.Controls.Add(this.button2);
-            this.Controls.Add(this.button1);
+            this.ClientSize = new System.Drawing.Size(951, 240);
+            this.Controls.Add(this.launchOrderToggle);
+            this.Controls.Add(this.scanButton);
+            this.Controls.Add(this.processListBox);
+            this.Controls.Add(this.removeButton);
+            this.Controls.Add(this.browseBtn);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Name = "Form1";
-            this.Text = "Process Watcher";
-            this.Load += new System.EventHandler(this.Form1_Load);
+            this.Margin = new System.Windows.Forms.Padding(4);
+            this.Name = "MainForm";
+            this.Text = "Process Enforcer";
+            this.Load += new System.EventHandler(this.MainForm_Load);
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -110,11 +133,12 @@
         #endregion
 
         private System.Windows.Forms.NotifyIcon notifyIcon;
-        private System.Windows.Forms.OpenFileDialog openFileDialog1;
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.Button button2;
-        private System.Windows.Forms.ListBox listBox1;
-        private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.OpenFileDialog fileDialog;
+        private System.Windows.Forms.Button browseBtn;
+        private System.Windows.Forms.Button removeButton;
+        private System.Windows.Forms.ListBox processListBox;
+        private System.Windows.Forms.Button scanButton;
+        private System.Windows.Forms.CheckBox launchOrderToggle;
     }
 }
 

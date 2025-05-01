@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("UnityAppWatcherTray")]
+[assembly: AssemblyTitle("ProcessEnforcerTray")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("UnityAppWatcherTray")]
-[assembly: AssemblyCopyright("Copyright ©  2022")]
+[assembly: AssemblyProduct("ProcessEnforcerTray")]
+[assembly: AssemblyCopyright("Copyright © 2025")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

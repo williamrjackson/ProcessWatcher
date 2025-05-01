@@ -1,9 +1,0 @@
-C:\Users\bjackson\Documents\visual studio 2015\Projects\ProcessWatcherTray\ProcessWatcherTray\bin\Release\ProcessWatcherTray.exe.config
-C:\Users\bjackson\Documents\visual studio 2015\Projects\ProcessWatcherTray\ProcessWatcherTray\bin\Release\ProcessWatcherTray.exe
-C:\Users\bjackson\Documents\visual studio 2015\Projects\ProcessWatcherTray\ProcessWatcherTray\bin\Release\ProcessWatcherTray.pdb
-C:\Users\bjackson\Documents\visual studio 2015\Projects\ProcessWatcherTray\ProcessWatcherTray\obj\Release\ProcessWatcherTray.csprojResolveAssemblyReference.cache
-C:\Users\bjackson\Documents\visual studio 2015\Projects\ProcessWatcherTray\ProcessWatcherTray\obj\Release\ProcessWatcherTray.Form1.resources
-C:\Users\bjackson\Documents\visual studio 2015\Projects\ProcessWatcherTray\ProcessWatcherTray\obj\Release\ProcessWatcherTray.Properties.Resources.resources
-C:\Users\bjackson\Documents\visual studio 2015\Projects\ProcessWatcherTray\ProcessWatcherTray\obj\Release\ProcessWatcherTray.csproj.GenerateResource.Cache
-C:\Users\bjackson\Documents\visual studio 2015\Projects\ProcessWatcherTray\ProcessWatcherTray\obj\Release\ProcessWatcherTray.exe
-C:\Users\bjackson\Documents\visual studio 2015\Projects\ProcessWatcherTray\ProcessWatcherTray\obj\Release\ProcessWatcherTray.pdb

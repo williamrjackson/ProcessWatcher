@@ -1,9 +1,0 @@
-c:\users\bjackson\documents\visual studio 2015\Projects\UnityAppWatcherTray\UnityAppWatcherTray\bin\Release\UnityAppWatcherTray.exe.config
-c:\users\bjackson\documents\visual studio 2015\Projects\UnityAppWatcherTray\UnityAppWatcherTray\bin\Release\UnityAppWatcherTray.exe
-c:\users\bjackson\documents\visual studio 2015\Projects\UnityAppWatcherTray\UnityAppWatcherTray\bin\Release\UnityAppWatcherTray.pdb
-c:\users\bjackson\documents\visual studio 2015\Projects\UnityAppWatcherTray\UnityAppWatcherTray\obj\Release\UnityAppWatcherTray.csprojResolveAssemblyReference.cache
-c:\users\bjackson\documents\visual studio 2015\Projects\UnityAppWatcherTray\UnityAppWatcherTray\obj\Release\UnityAppWatcherTray.Form1.resources
-c:\users\bjackson\documents\visual studio 2015\Projects\UnityAppWatcherTray\UnityAppWatcherTray\obj\Release\UnityAppWatcherTray.Properties.Resources.resources
-c:\users\bjackson\documents\visual studio 2015\Projects\UnityAppWatcherTray\UnityAppWatcherTray\obj\Release\UnityAppWatcherTray.csproj.GenerateResource.Cache
-c:\users\bjackson\documents\visual studio 2015\Projects\UnityAppWatcherTray\UnityAppWatcherTray\obj\Release\UnityAppWatcherTray.exe
-c:\users\bjackson\documents\visual studio 2015\Projects\UnityAppWatcherTray\UnityAppWatcherTray\obj\Release\UnityAppWatcherTray.pdb
