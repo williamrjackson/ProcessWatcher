@@ -1,1 +1,48 @@
-processPaths.txt
+# Ignore Visual Studio temporary files, build results, and
+# user-specific files
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Build results
+bin/
+obj/
+*.exe
+*.dll
+*.pdb
+*.cache
+*.ilk
+*.log
+*.vspscc
+*.vssscc
+*.tmp
+*.csproj.user
+
+# Resharper files
+_ReSharper*/
+*.DotSettings.user
+
+# NuGet packages
+*.nupkg
+packages/
+project.lock.json
+project.fragment.lock.json
+
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Folder config file
+Desktop.ini
+
+# Rider files
+.idea/
+
+# Logs
+*.log
+
+# Other
+*.tlog
+*.lastbuildstate
