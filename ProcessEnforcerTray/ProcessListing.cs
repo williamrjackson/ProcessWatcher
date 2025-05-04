@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Windows.Forms;
 
 namespace Wrj.ProcessEnforcerTray
 {
@@ -36,24 +37,31 @@ namespace Wrj.ProcessEnforcerTray
 
         private void CreateNewProcess()
         {
-            try
-            {
-                if (_process != null)
-                {
-                    _process.Kill();
-                    _process.WaitForExit();
-                }
-            }
-            catch { }
-            finally
-            {
+            //try
+            //{
+            //    if (_process != null)
+            //    {
+            //        if (!process.CloseMainWindow())
+            //        {
+            //            process.Kill();
+            //        }
+            //        _process.WaitForExit();
+            //    }
+            //}
+            //catch 
+            //{
+            //    // Handle any exceptions that occur while closing the process
+            //    ErrorLogging.Log($"Error closing process: {path}");
+            //}
+            //finally
+            //{
                 _process = new Process();
                 _process.StartInfo.FileName = path;
                 _process.StartInfo.WorkingDirectory = Path.GetDirectoryName(path);
                 _process.StartInfo.UseShellExecute = true;
                 _process.StartInfo.CreateNoWindow = true;
                 _process.StartInfo.Arguments = arguments;
-            }
+            //}
         }
         public ProcessListing(string path, int delay)
         {
@@ -67,7 +75,6 @@ namespace Wrj.ProcessEnforcerTray
             get => arguments;
             set 
             {
-                //Console.WriteLine($"Setting arguments to {value}");
                 arguments = value;
             }
         }
@@ -136,8 +143,20 @@ namespace Wrj.ProcessEnforcerTray
             {
                 if (p.MainModule.FileName.StartsWith(FilePath, StringComparison.InvariantCultureIgnoreCase))
                 {
-                    p.Kill();
-                    p.WaitForExit();
+                    Logging.Log($"Stopping process: {p.ProcessName}");
+                    try
+                    {
+                        if (!p.CloseMainWindow())
+                        {
+                            p.Kill();
+                        }
+                        p.WaitForExit();
+                    }
+                    catch (Exception ex)
+                    {
+                        // Handle any exceptions that occur while closing the process
+                        Logging.Log($"Error stopping process: {ex.Message}");
+                    }
                 }
             }
         }
@@ -145,7 +164,15 @@ namespace Wrj.ProcessEnforcerTray
         {
             if (!IsRunning())
             {
-                process.Start();
+                Logging.Log($"Starting process: {path}");
+                try
+                {
+                    process.Start();
+                }
+                catch (Exception ex)
+                {
+                    Logging.Log($"Error starting process: {ex.Message}");
+                }
             }
         }
     }

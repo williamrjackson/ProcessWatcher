@@ -18,9 +18,21 @@ namespace Wrj.ProcessEnforcerTray
         private TextBox editTextBox = new TextBox();
         string persistFileText = string.Empty;
 
+        public string PersistPath
+        {
+            get
+            {
+                if (!IsFilePathWritable(persistPath))
+                {
+                    persistPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Process Enforcer", Path.GetFileName(persistPath));
+                }
+                return persistPath;
+            }
+        }
         private bool IsScanning => timer != null && timer.Enabled;
         private bool IsEditing = false;
         private bool IsSizeChanging = false;
+        private bool isUsingAlternativePath = false;
 
         private const string RegistryPath = @"Software\Wrj\ProcessEnforcer";
         private const string EnforceOrderSettingName = "EnforceOrder";
@@ -33,21 +45,25 @@ namespace Wrj.ProcessEnforcerTray
             set
             {
                 enforceOrder = value;
-                settingsKey.SetValue(EnforceOrderSettingName, value);
+                try
+                {
+                    settingsKey.SetValue(EnforceOrderSettingName, value);
+                }
+                catch (UnauthorizedAccessException ex)
+                {
+                    Logging.Log($"Error accessing registry: {ex.Message}");
+                }
             }
         }
 
         public MainForm(string alternativePath = null)
         {
-            if (!string.IsNullOrEmpty(alternativePath) && File.Exists(alternativePath))
-            { 
-                persistPath = Path.GetFullPath(alternativePath);
-                Console.WriteLine($"Alternative path provided: {persistPath}");
-                enforceOrder = true;
-            }
-            else
+            if (!string.IsNullOrEmpty(alternativePath) && File.Exists(alternativePath) && Path.GetExtension(alternativePath).Equals(".txt", StringComparison.OrdinalIgnoreCase))
             {
-                enforceOrder = Convert.ToBoolean(settingsKey.GetValue(EnforceOrderSettingName, launchOrderToggle.Checked));
+                persistPath = Path.GetFullPath(alternativePath);
+                Logging.Log($"Alternative path provided: {persistPath}");
+                isUsingAlternativePath = true;
+                enforceOrder = true;
             }
 
             InitializeComponent();
@@ -103,7 +119,7 @@ namespace Wrj.ProcessEnforcerTray
                     processListView.Items.Add(new ListViewItem(new string[] { processPaths[i].FilePath, processPaths[i].Arguments, processPaths[i].Delay.ToString() }));
                     persistFileText += $"{processPaths[i].FilePath};{processPaths[i].Arguments};{processPaths[i].Delay}{Environment.NewLine}";
                 }
-                File.WriteAllText(persistPath, persistFileText.Trim(Environment.NewLine.ToCharArray()));
+                File.WriteAllText(PersistPath, persistFileText.Trim(Environment.NewLine.ToCharArray()));
                 if (!IsEditing) StartTimer();
             }
             else
@@ -114,13 +130,17 @@ namespace Wrj.ProcessEnforcerTray
 
         private void MainForm_Load(object sender, EventArgs e)
         {
+            if (!isUsingAlternativePath)
+            {
+                enforceOrder = Convert.ToBoolean(settingsKey.GetValue(EnforceOrderSettingName, launchOrderToggle.Checked));
+            }
+
             launchOrderToggle.Checked = EnforceOrder;
             launchOrderToggle.Enabled = settingsKey != null;
-
-            if (File.Exists(persistPath))
+            Logging.Log("Loading settings from registry");
+            if (File.Exists(PersistPath))
             {
-                persistFileText = File.ReadAllText(persistPath);
-                //processPaths = new List<ProcessListing>(persistFileText.Trim(Environment.NewLine.ToCharArray()).Split(Environment.NewLine.ToCharArray()));
+                persistFileText = File.ReadAllText(PersistPath);
                 processPaths = new List<ProcessListing>();
                 string[] lines = persistFileText.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
                 foreach (string line in lines)
@@ -134,7 +154,10 @@ namespace Wrj.ProcessEnforcerTray
 
                     }
                 }
-                processPaths.RemoveAll((s) => string.IsNullOrWhiteSpace(s.FilePath) || !File.Exists(s.FilePath));
+                lock (processPaths)
+                {
+                    processPaths.RemoveAll((s) => string.IsNullOrWhiteSpace(s.FilePath) || !File.Exists(s.FilePath));
+                }
                 PathsDataChanged();
             }
         }
@@ -142,23 +165,41 @@ namespace Wrj.ProcessEnforcerTray
         private void MinimizeToTray()
         {
             if (!this.IsHandleCreated) CreateHandle();
-            this.Invoke(new MethodInvoker(delegate ()
+            if (this.InvokeRequired)
             {
-                Hide();
+                this.Invoke(new MethodInvoker(delegate ()
+                {
+                    Hide();
+                    WindowState = FormWindowState.Minimized;
+                    notifyIcon.Visible = true;
+                }));
+            }
+            else
+            {
                 WindowState = FormWindowState.Minimized;
                 notifyIcon.Visible = true;
-            }));
+            }
         }
 
         private void OpenFromTray()
         {
             if (!this.IsHandleCreated) CreateHandle();
-            this.Invoke(new MethodInvoker(delegate ()
+            if (this.InvokeRequired)
+            {
+
+                this.Invoke(new MethodInvoker(delegate ()
+                {
+                    Show();
+                    this.WindowState = FormWindowState.Normal;
+                    notifyIcon.Visible = false;
+                }));
+            }
+            else
             {
                 Show();
                 this.WindowState = FormWindowState.Normal;
                 notifyIcon.Visible = false;
-            }));
+            }
         }
 
         private void StartTimer()
@@ -185,9 +226,12 @@ namespace Wrj.ProcessEnforcerTray
 
         private void CloseAll()
         {
-            foreach (var path in processPaths)
+            lock (processPaths)
             {
-                path.Stop();
+                foreach (var path in processPaths)
+                {
+                    path.Stop();
+                }
             }
         }
 
@@ -202,7 +246,7 @@ namespace Wrj.ProcessEnforcerTray
                     {
                         if (processPaths[i].AgeInSeconds() > processPaths[i - 1].AgeInSeconds())
                         {
-                            //Console.WriteLine($"Stopping {processPaths[i].FilePath} ({processPaths[i].AgeInSeconds()}) because it was launched before {processPaths[i - 1].FilePath}({processPaths[i - 1].AgeInSeconds()})");
+                            Logging.Log($"Stopping {processPaths[i].FilePath} ({processPaths[i].AgeInSeconds()}) because it was launched before {processPaths[i - 1].FilePath}({processPaths[i - 1].AgeInSeconds()})");
                             CloseAll();
                             OpenFromTray();
                             return;
@@ -214,8 +258,10 @@ namespace Wrj.ProcessEnforcerTray
                     if (processPaths[i].State == ProcessListing.ProcessState.Running)
                     {
                         if (i == processPaths.Count - 1)
+                        {
                             MinimizeToTray();
-                        continue;
+                            continue;
+                        }
                     }
                     else if (processPaths[i].State == ProcessListing.ProcessState.Stopped)
                     {
@@ -262,6 +308,28 @@ namespace Wrj.ProcessEnforcerTray
                     processPaths.Add(new ProcessListing(path, 0));
                     PathsDataChanged();
                 }
+            }
+        }
+
+        public bool IsFilePathWritable(string filePath)
+        {
+            try
+            {
+                using (FileStream fs = File.Open(filePath, FileMode.OpenOrCreate, FileAccess.Write))
+                {
+                    // If we can open the file for writing, it's writable
+                }
+                return true;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                Logging.Log($"Unauthorized access to file: {filePath}");
+                return false; // No write permissions
+            }
+            catch (IOException)
+            {
+                Logging.Log($"File is locked or inaccessible: {filePath}");
+                return false; // File is locked or inaccessible
             }
         }
 
@@ -316,7 +384,10 @@ namespace Wrj.ProcessEnforcerTray
             {
                 string toRemove = ((ListViewItem)item).SubItems[0].Text;
                 processPaths.First(proc => proc.FilePath == toRemove).Stop();
-                processPaths.Remove(processPaths.First(proc => proc.FilePath == toRemove));
+                lock (processPaths)
+                {
+                    processPaths.Remove(processPaths.First(proc => proc.FilePath == toRemove));
+                }
             }
             PathsDataChanged();
         }
@@ -333,13 +404,10 @@ namespace Wrj.ProcessEnforcerTray
             if (hitTest.Item != null && hitTest.SubItem != null)
             {
                 IsEditing = true;
-                //Console.WriteLine($"Clicked column {hitTest.Item.SubItems.IndexOf(hitTest.SubItem)}: {hitTest.SubItem.Text}");
-                //Console.WriteLine($"Clicked row {processListView.Items.IndexOf(hitTest.Item)}");
                 int columnIndex = hitTest.Item.SubItems.IndexOf(hitTest.SubItem);
                 if (columnIndex == 0) return;
                 int rowIndex = processListView.Items.IndexOf(hitTest.Item);
 
-                //Console.WriteLine($"Editing column {columnIndex}");
                 Rectangle cellBounds = hitTest.SubItem.Bounds;
                 editTextBox.Bounds = new Rectangle(cellBounds.X, cellBounds.Y, cellBounds.Width, cellBounds.Height);
                 editTextBox.Text = hitTest.SubItem.Text;
@@ -410,6 +478,11 @@ namespace Wrj.ProcessEnforcerTray
         }
         private void ProcessListView_ItemDrag(object sender, ItemDragEventArgs e)
         {
+            // If EnforceOrder is disabled, do nothing
+            if (!EnforceOrder) return;
+            StopTimer();
+            IsEditing = true;
+
             // Start the drag-and-drop operation
             DoDragDrop(e.Item, DragDropEffects.Move);
         }
@@ -431,19 +504,27 @@ namespace Wrj.ProcessEnforcerTray
         {
             // If EnforceOrder is disabled, do nothing
             if (!EnforceOrder) return;
+            StopTimer();
+            IsEditing = true;
             // Get the dropped item
             if (e.Data.GetDataPresent(typeof(ListViewItem)))
             {
                 var draggedItem = (ListViewItem)e.Data.GetData(typeof(ListViewItem));
                 var targetPoint = processListView.PointToClient(new Point(e.X, e.Y));
                 var targetItem = processListView.GetItemAt(targetPoint.X, targetPoint.Y);
-
                 if (targetItem != null && draggedItem != targetItem)
                 {
                     // Remove the dragged item and reinsert it at the target position
                     int targetIndex = targetItem.Index;
                     processListView.Items.Remove(draggedItem);
                     processListView.Items.Insert(targetIndex, draggedItem);
+
+                    // Update the processPaths list based on the new order
+                    processPaths = processListView.Items
+                    .Cast<ListViewItem>()
+                    .Select(item => processPaths.First(p => p.FilePath == item.Text))
+                    .ToList();
+
                     PathsDataChanged();
                 }
             }
