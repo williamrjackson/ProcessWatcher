@@ -34,9 +34,12 @@
             this.fileDialog = new System.Windows.Forms.OpenFileDialog();
             this.browseBtn = new System.Windows.Forms.Button();
             this.removeButton = new System.Windows.Forms.Button();
-            this.processListBox = new System.Windows.Forms.ListBox();
             this.scanButton = new System.Windows.Forms.Button();
             this.launchOrderToggle = new System.Windows.Forms.CheckBox();
+            this.processListView = new System.Windows.Forms.ListView();
+            this.processPath = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.arguments = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.delayTime = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.SuspendLayout();
             // 
             // notifyIcon
@@ -71,20 +74,9 @@
             this.removeButton.UseVisualStyleBackColor = true;
             this.removeButton.Click += new System.EventHandler(this.removeButton_Click);
             // 
-            // processListBox
-            // 
-            this.processListBox.FormattingEnabled = true;
-            this.processListBox.ItemHeight = 20;
-            this.processListBox.Location = new System.Drawing.Point(18, 21);
-            this.processListBox.Margin = new System.Windows.Forms.Padding(4);
-            this.processListBox.Name = "processListBox";
-            this.processListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiSimple;
-            this.processListBox.Size = new System.Drawing.Size(794, 204);
-            this.processListBox.TabIndex = 4;
-            // 
             // scanButton
             // 
-            this.scanButton.Location = new System.Drawing.Point(825, 190);
+            this.scanButton.Location = new System.Drawing.Point(825, 194);
             this.scanButton.Margin = new System.Windows.Forms.Padding(4);
             this.scanButton.Name = "scanButton";
             this.scanButton.Size = new System.Drawing.Size(112, 33);
@@ -96,26 +88,58 @@
             // launchOrderToggle
             // 
             this.launchOrderToggle.AutoSize = true;
-            this.launchOrderToggle.Checked = true;
-            this.launchOrderToggle.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.launchOrderToggle.Enabled = false;
             this.launchOrderToggle.Location = new System.Drawing.Point(18, 213);
             this.launchOrderToggle.Name = "launchOrderToggle";
             this.launchOrderToggle.Size = new System.Drawing.Size(192, 24);
             this.launchOrderToggle.TabIndex = 6;
             this.launchOrderToggle.Text = "Enforce Launch Order";
             this.launchOrderToggle.UseVisualStyleBackColor = true;
-            this.launchOrderToggle.Visible = false;
             this.launchOrderToggle.CheckedChanged += new System.EventHandler(this.launchOrderToggle_CheckedChanged);
+            // 
+            // processListView
+            // 
+            this.processListView.AllowDrop = true;
+            this.processListView.AutoArrange = false;
+            this.processListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.processPath,
+            this.arguments,
+            this.delayTime});
+            this.processListView.FullRowSelect = true;
+            this.processListView.GridLines = true;
+            this.processListView.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
+            this.processListView.HideSelection = false;
+            this.processListView.Location = new System.Drawing.Point(18, 11);
+            this.processListView.Name = "processListView";
+            this.processListView.Scrollable = false;
+            this.processListView.ShowGroups = false;
+            this.processListView.ShowItemToolTips = true;
+            this.processListView.Size = new System.Drawing.Size(800, 196);
+            this.processListView.TabIndex = 7;
+            this.processListView.UseCompatibleStateImageBehavior = false;
+            this.processListView.View = System.Windows.Forms.View.Details;
+            // 
+            // processPath
+            // 
+            this.processPath.Text = "Process";
+            this.processPath.Width = 300;
+            // 
+            // arguments
+            // 
+            this.arguments.Text = "Args";
+            // 
+            // delayTime
+            // 
+            this.delayTime.Text = "Delay(sec)";
+            this.delayTime.Width = 300;
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(951, 240);
+            this.Controls.Add(this.processListView);
             this.Controls.Add(this.launchOrderToggle);
             this.Controls.Add(this.scanButton);
-            this.Controls.Add(this.processListBox);
             this.Controls.Add(this.removeButton);
             this.Controls.Add(this.browseBtn);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -136,9 +160,12 @@
         private System.Windows.Forms.OpenFileDialog fileDialog;
         private System.Windows.Forms.Button browseBtn;
         private System.Windows.Forms.Button removeButton;
-        private System.Windows.Forms.ListBox processListBox;
         private System.Windows.Forms.Button scanButton;
         private System.Windows.Forms.CheckBox launchOrderToggle;
+        private System.Windows.Forms.ListView processListView;
+        private System.Windows.Forms.ColumnHeader processPath;
+        private System.Windows.Forms.ColumnHeader delayTime;
+        private System.Windows.Forms.ColumnHeader arguments;
     }
 }
 
