@@ -58,13 +58,6 @@ namespace Wrj.ProcessEnforcerTray
 
         public MainForm(string alternativePath = null)
         {
-            if (!string.IsNullOrEmpty(alternativePath) && File.Exists(alternativePath) && Path.GetExtension(alternativePath).Equals(".txt", StringComparison.OrdinalIgnoreCase))
-            {
-                persistPath = Path.GetFullPath(alternativePath);
-                Logging.Log($"Alternative path provided: {persistPath}");
-                isUsingAlternativePath = true;
-                enforceOrder = true;
-            }
 
             InitializeComponent();
 
@@ -87,6 +80,31 @@ namespace Wrj.ProcessEnforcerTray
             editTextBox.KeyPress += EditTextBox_KeyPress;
             editTextBox.KeyDown += EditTextBox_KeyDown;
             processListView.Controls.Add(editTextBox);
+
+            if (!string.IsNullOrEmpty(alternativePath))
+            {
+                if (!File.Exists(alternativePath))
+                {
+                    // Try BaseDirectory
+                    if (File.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, alternativePath)))
+                    {
+                        alternativePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, alternativePath);
+                    }
+                }
+                if (File.Exists(alternativePath) && Path.GetExtension(alternativePath).Equals(".txt", StringComparison.OrdinalIgnoreCase))
+                {
+                    persistPath = alternativePath;
+                }
+                else
+                {
+                    Logging.Log($"Invalid file path provided: {alternativePath}");
+                }
+
+                persistPath = Path.GetFullPath(alternativePath);
+                Logging.Log($"Alternative path provided: {persistPath}");
+                isUsingAlternativePath = true;
+                enforceOrder = true;
+            }
         }
 
         private void ShowHideDelayColumn()
