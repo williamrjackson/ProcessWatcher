@@ -37,11 +37,20 @@ namespace Wrj.ProcessEnforcerTray
             }
         }
 
-        public MainForm()
+        public MainForm(string alternativePath = null)
         {
-            InitializeComponent();
+            if (!string.IsNullOrEmpty(alternativePath) && File.Exists(alternativePath))
+            { 
+                persistPath = Path.GetFullPath(alternativePath);
+                Console.WriteLine($"Alternative path provided: {persistPath}");
+                enforceOrder = true;
+            }
+            else
+            {
+                enforceOrder = Convert.ToBoolean(settingsKey.GetValue(EnforceOrderSettingName, launchOrderToggle.Checked));
+            }
 
-            enforceOrder = Convert.ToBoolean(settingsKey.GetValue(EnforceOrderSettingName, launchOrderToggle.Checked));
+            InitializeComponent();
 
             processListView.Columns[0].Width = processListView.Bounds.Width / 2;
             processListView.Columns[1].Width = processListView.Bounds.Width / 2;
@@ -199,7 +208,24 @@ namespace Wrj.ProcessEnforcerTray
                             return;
                         }
                     }
-                    MinimizeToTray();
+                }
+                for (int i = 0; i < processPaths.Count; i++)
+                {
+                    if (processPaths[i].State == ProcessListing.ProcessState.Running)
+                    {
+                        if (i == processPaths.Count - 1)
+                            MinimizeToTray();
+                        continue;
+                    }
+                    else if (processPaths[i].State == ProcessListing.ProcessState.Stopped)
+                    {
+                        processPaths[i].Start();
+                        return;
+                    }
+                    else //Launching
+                    {
+                        return;
+                    }
                 }
             }
             else
@@ -429,6 +455,5 @@ namespace Wrj.ProcessEnforcerTray
             e.Cancel = true; // Prevent the column width from changing
             e.NewWidth = processListView.Columns[e.ColumnIndex].Width; // Keep the current width
         }
-
     }
 }
