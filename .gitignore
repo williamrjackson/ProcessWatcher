@@ -8,6 +8,7 @@
 
 # Build results
 obj/
+bin/Debug/
 *.dll
 *.pdb
 *.cache
