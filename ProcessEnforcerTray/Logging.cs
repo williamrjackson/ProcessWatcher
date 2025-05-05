@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace Wrj.ProcessEnforcerTray
+namespace ProcessEnforcerTray
 {
     internal class Logging
     {

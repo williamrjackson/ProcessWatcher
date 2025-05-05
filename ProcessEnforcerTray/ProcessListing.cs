@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using System.Windows.Forms;
 
-namespace Wrj.ProcessEnforcerTray
+namespace ProcessEnforcerTray
 {
     internal class ProcessListing
     {
@@ -65,7 +64,7 @@ namespace Wrj.ProcessEnforcerTray
         }
         public ProcessListing(string path, int delay)
         {
-            this.path = path.Trim();
+            this.path = Path.GetFullPath(path.Trim());
             Delay = delay;
             CreateNewProcess();
         }

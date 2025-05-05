@@ -2,7 +2,7 @@
 using System.IO;
 using System.Windows.Forms;
 
-namespace Wrj.ProcessEnforcerTray
+namespace ProcessEnforcerTray
 {
     static class Program
     {
@@ -15,11 +15,8 @@ namespace Wrj.ProcessEnforcerTray
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            // Check if an argument is provided and points to a valid file
-            string alternativePath = args.Length > 0 && File.Exists(args[0]) ? args[0] : null;
-
             // Pass the alternative path to MainForm
-            Application.Run(new MainForm(alternativePath));
+            Application.Run(new MainForm(args));
         }
     }
 }

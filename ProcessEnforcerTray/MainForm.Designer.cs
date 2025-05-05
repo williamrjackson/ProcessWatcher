@@ -1,4 +1,4 @@
-﻿namespace Wrj.ProcessEnforcerTray
+﻿namespace ProcessEnforcerTray
 {
     partial class MainForm
     {
@@ -40,6 +40,12 @@
             this.processPath = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.arguments = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.delayTime = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.menuStrip = new System.Windows.Forms.MenuStrip();
+            this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.loadLaunchFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.uDPToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
             // notifyIcon
@@ -54,7 +60,7 @@
             // 
             // browseBtn
             // 
-            this.browseBtn.Location = new System.Drawing.Point(825, 11);
+            this.browseBtn.Location = new System.Drawing.Point(825, 40);
             this.browseBtn.Margin = new System.Windows.Forms.Padding(4);
             this.browseBtn.Name = "browseBtn";
             this.browseBtn.Size = new System.Drawing.Size(112, 33);
@@ -65,7 +71,7 @@
             // 
             // removeButton
             // 
-            this.removeButton.Location = new System.Drawing.Point(825, 61);
+            this.removeButton.Location = new System.Drawing.Point(825, 90);
             this.removeButton.Margin = new System.Windows.Forms.Padding(4);
             this.removeButton.Name = "removeButton";
             this.removeButton.Size = new System.Drawing.Size(112, 33);
@@ -76,7 +82,7 @@
             // 
             // scanButton
             // 
-            this.scanButton.Location = new System.Drawing.Point(825, 194);
+            this.scanButton.Location = new System.Drawing.Point(825, 223);
             this.scanButton.Margin = new System.Windows.Forms.Padding(4);
             this.scanButton.Name = "scanButton";
             this.scanButton.Size = new System.Drawing.Size(112, 33);
@@ -88,7 +94,7 @@
             // launchOrderToggle
             // 
             this.launchOrderToggle.AutoSize = true;
-            this.launchOrderToggle.Location = new System.Drawing.Point(18, 213);
+            this.launchOrderToggle.Location = new System.Drawing.Point(18, 242);
             this.launchOrderToggle.Name = "launchOrderToggle";
             this.launchOrderToggle.Size = new System.Drawing.Size(192, 24);
             this.launchOrderToggle.TabIndex = 6;
@@ -108,7 +114,7 @@
             this.processListView.GridLines = true;
             this.processListView.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
             this.processListView.HideSelection = false;
-            this.processListView.Location = new System.Drawing.Point(18, 11);
+            this.processListView.Location = new System.Drawing.Point(18, 40);
             this.processListView.Name = "processListView";
             this.processListView.Scrollable = false;
             this.processListView.ShowGroups = false;
@@ -132,21 +138,68 @@
             this.delayTime.Text = "Delay(sec)";
             this.delayTime.Width = 300;
             // 
+            // menuStrip
+            // 
+            this.menuStrip.GripMargin = new System.Windows.Forms.Padding(2, 2, 0, 2);
+            this.menuStrip.ImageScalingSize = new System.Drawing.Size(24, 24);
+            this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.fileToolStripMenuItem,
+            this.settingsToolStripMenuItem});
+            this.menuStrip.Location = new System.Drawing.Point(0, 0);
+            this.menuStrip.Name = "menuStrip";
+            this.menuStrip.Size = new System.Drawing.Size(951, 33);
+            this.menuStrip.TabIndex = 8;
+            this.menuStrip.Text = "menuStrip1";
+            // 
+            // fileToolStripMenuItem
+            // 
+            this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.loadLaunchFileToolStripMenuItem});
+            this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
+            this.fileToolStripMenuItem.Size = new System.Drawing.Size(54, 29);
+            this.fileToolStripMenuItem.Text = "File";
+            // 
+            // loadLaunchFileToolStripMenuItem
+            // 
+            this.loadLaunchFileToolStripMenuItem.Name = "loadLaunchFileToolStripMenuItem";
+            this.loadLaunchFileToolStripMenuItem.Size = new System.Drawing.Size(256, 34);
+            this.loadLaunchFileToolStripMenuItem.Text = "Load Launch File...";
+            this.loadLaunchFileToolStripMenuItem.Click += new System.EventHandler(this.loadLaunchFileToolStripMenuItem_Click);
+            // 
+            // settingsToolStripMenuItem
+            // 
+            this.settingsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.uDPToolStripMenuItem});
+            this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
+            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(92, 29);
+            this.settingsToolStripMenuItem.Text = "Settings";
+            // 
+            // uDPToolStripMenuItem
+            // 
+            this.uDPToolStripMenuItem.Name = "uDPToolStripMenuItem";
+            this.uDPToolStripMenuItem.Size = new System.Drawing.Size(270, 34);
+            this.uDPToolStripMenuItem.Text = "UDP...";
+            this.uDPToolStripMenuItem.Click += new System.EventHandler(this.uDPToolStripMenuItem_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(951, 240);
+            this.ClientSize = new System.Drawing.Size(951, 273);
             this.Controls.Add(this.processListView);
             this.Controls.Add(this.launchOrderToggle);
             this.Controls.Add(this.scanButton);
             this.Controls.Add(this.removeButton);
             this.Controls.Add(this.browseBtn);
+            this.Controls.Add(this.menuStrip);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.MainMenuStrip = this.menuStrip;
             this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "MainForm";
             this.Text = "Process Enforcer";
             this.Load += new System.EventHandler(this.MainForm_Load);
+            this.menuStrip.ResumeLayout(false);
+            this.menuStrip.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -166,6 +219,11 @@
         private System.Windows.Forms.ColumnHeader processPath;
         private System.Windows.Forms.ColumnHeader delayTime;
         private System.Windows.Forms.ColumnHeader arguments;
+        private System.Windows.Forms.MenuStrip menuStrip;
+        private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem loadLaunchFileToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem settingsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem uDPToolStripMenuItem;
     }
 }
 

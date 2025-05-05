@@ -6,8 +6,9 @@ using System.Timers;
 using Microsoft.Win32;
 using System.Windows.Forms;
 using System.Drawing;
+using System.Net;
 
-namespace Wrj.ProcessEnforcerTray
+namespace ProcessEnforcerTray
 {
     public partial class MainForm : Form
     {
@@ -36,9 +37,58 @@ namespace Wrj.ProcessEnforcerTray
 
         private const string RegistryPath = @"Software\Wrj\ProcessEnforcer";
         private const string EnforceOrderSettingName = "EnforceOrder";
-        private RegistryKey settingsKey = Registry.CurrentUser.CreateSubKey(RegistryPath);
+        private const string UdpAddressSettingName = "UdpAddress";
+        private const string UdpPortSettingName = "UdpPort";
+        private static RegistryKey settingsKey = Registry.CurrentUser.CreateSubKey(RegistryPath);
+
+        private static UDPSocket udpServer = new UDPSocket();
 
         private bool enforceOrder = false;
+        private static string udpAddress = "127.0.0.1";
+        private static int udpPort = 27000;
+        public static IPAddress UdpAddress
+        {
+            get
+            {
+                if (IPAddress.TryParse(udpAddress, out var ip))
+                {
+                    return ip;
+                }
+                return null;
+            }
+            private set
+            {
+                udpAddress = value.ToString();
+                try
+                {
+                    settingsKey.SetValue(UdpAddressSettingName, value);
+                }
+                catch (UnauthorizedAccessException ex)
+                {
+                    Logging.Log($"Error accessing registry: {ex.Message}");
+                }
+            }
+        }
+        public static int UdpPort
+        {
+            get => udpPort;
+            private set
+            {
+                if (value >= 0 || value <= 65535)
+                {
+                    udpPort = value;
+                    try
+                    {
+                        settingsKey.SetValue(UdpPortSettingName, value);
+                    }
+                    catch (UnauthorizedAccessException ex)
+                    {
+                        Logging.Log($"Error accessing registry: {ex.Message}");
+                    }
+                }
+            }
+        }
+
         public bool EnforceOrder
         {
             get => enforceOrder;
@@ -56,7 +106,7 @@ namespace Wrj.ProcessEnforcerTray
             }
         }
 
-        public MainForm(string alternativePath = null)
+        public MainForm(string[] args)
         {
 
             InitializeComponent();
@@ -81,29 +131,16 @@ namespace Wrj.ProcessEnforcerTray
             editTextBox.KeyDown += EditTextBox_KeyDown;
             processListView.Controls.Add(editTextBox);
 
-            if (!string.IsNullOrEmpty(alternativePath))
+            if (args.Length > 0 && File.Exists(args[0]))
             {
-                if (!File.Exists(alternativePath))
+                LoadLauncherFile(args[0], true);
+            }
+            else if (args.Length > 1)
+            {
+                if (args.Where(x => x.Split(',').Length == 3).Count() == args.Length)
                 {
-                    // Try BaseDirectory
-                    if (File.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, alternativePath)))
-                    {
-                        alternativePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, alternativePath);
-                    }
+                    ParseProcessPaths(args);
                 }
-                if (File.Exists(alternativePath) && Path.GetExtension(alternativePath).Equals(".txt", StringComparison.OrdinalIgnoreCase))
-                {
-                    persistPath = alternativePath;
-                }
-                else
-                {
-                    Logging.Log($"Invalid file path provided: {alternativePath}");
-                }
-
-                persistPath = Path.GetFullPath(alternativePath);
-                Logging.Log($"Alternative path provided: {persistPath}");
-                isUsingAlternativePath = true;
-                enforceOrder = true;
             }
         }
 
@@ -135,7 +172,7 @@ namespace Wrj.ProcessEnforcerTray
                 for (int i = 0; i < processPaths.Count; i++)
                 {
                     processListView.Items.Add(new ListViewItem(new string[] { processPaths[i].FilePath, processPaths[i].Arguments, processPaths[i].Delay.ToString() }));
-                    persistFileText += $"{processPaths[i].FilePath};{processPaths[i].Arguments};{processPaths[i].Delay}{Environment.NewLine}";
+                    persistFileText += $"{processPaths[i].FilePath},{processPaths[i].Arguments},{processPaths[i].Delay}{Environment.NewLine}";
                 }
                 File.WriteAllText(PersistPath, persistFileText.Trim(Environment.NewLine.ToCharArray()));
                 if (!IsEditing) StartTimer();
@@ -152,34 +189,100 @@ namespace Wrj.ProcessEnforcerTray
             {
                 enforceOrder = Convert.ToBoolean(settingsKey.GetValue(EnforceOrderSettingName, launchOrderToggle.Checked));
             }
-
             launchOrderToggle.Checked = EnforceOrder;
             launchOrderToggle.Enabled = settingsKey != null;
-            Logging.Log("Loading settings from registry");
-            if (File.Exists(PersistPath))
+
+            udpPort = Convert.ToInt32(settingsKey.GetValue(UdpPortSettingName, udpPort));
+            udpAddress = settingsKey.GetValue(UdpAddressSettingName, udpAddress).ToString();
+            if (IPAddress.TryParse(udpAddress, out var ip))
             {
-                persistFileText = File.ReadAllText(PersistPath);
+                UdpAddress = ip;
+            }
+            else
+            {
+                Logging.Log($"Invalid IP address format in registry: {udpAddress}");
+                UdpAddress = IPAddress.Loopback;
+            }
+            udpServer.MessageReceived += UdpServer_MessageReceived;
+            StartUdpServer(UdpAddress, UdpPort);
+            Logging.Log("Loading settings from registry");
+
+            if ((processPaths == null || processPaths.Count == 0) && File.Exists(PersistPath))
+            {
+                LoadLauncherFile(PersistPath, false);
+            }
+        }
+
+        private void UdpServer_MessageReceived(string msg, EndPoint endPoint)
+        {
+            Logging.Log($"UDP Message Received: {msg} from {endPoint}");
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new MethodInvoker(delegate ()
+                {
+                    ParseUdpMessage(msg);
+                }));
+            }
+            else
+            {
+                ParseUdpMessage(msg);
+            }
+        }
+        private void ParseUdpMessage(string msg)
+        {
+            msg = msg.Trim();
+
+            string[] parts = msg.Split(',');
+            if (parts.Length % 3 == 0)
+            {
+                for (int i = 0; i < parts.Length; i += 3)
+                {
+                    if (!File.Exists(parts[i]))
+                    {
+                        Logging.Log($"Invalid file path provided: {parts[i]}");
+                        return;
+                    }
+                }
+                lock (processPaths)
+                {
+                    processPaths.Clear();
+                    for (int i = 0; i < parts.Length; i += 3)
+                    {
+                        string path = parts[i].Trim();
+                        string args = parts[i + 1].Trim();
+                        int delay = int.TryParse(parts[i + 2], out int d) ? d : 0;
+                        ProcessListing newProcess = new ProcessListing(path, delay);
+                        newProcess.Arguments = args;
+                        processPaths.Add(newProcess);
+                    }
+                }
+                PathsDataChanged();
+            }
+            else if (parts.Length == 1 && msg.EndsWith(".txt"))
+            {
+                LoadLauncherFile(msg, true);
+            }
+        }
+
+        private void ParseProcessPaths(string[] lines)
+        {
+            CloseAll();
+            lock (processPaths)
+            {
                 processPaths = new List<ProcessListing>();
-                string[] lines = persistFileText.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
                 foreach (string line in lines)
                 {
-                    string[] parts = line.Split(';');
+                    string[] parts = line.Split(',');
                     if (parts.Length == 3 && int.TryParse(parts[2], out int delay))
                     {
                         ProcessListing newProcess = new ProcessListing(parts[0].Trim(), delay);
                         newProcess.Arguments = parts[1].Trim();
                         processPaths.Add(newProcess);
-
                     }
                 }
-                lock (processPaths)
-                {
-                    processPaths.RemoveAll((s) => string.IsNullOrWhiteSpace(s.FilePath) || !File.Exists(s.FilePath));
-                }
-                PathsDataChanged();
             }
+            PathsDataChanged();
         }
-
         private void MinimizeToTray()
         {
             if (!this.IsHandleCreated) CreateHandle();
@@ -219,7 +322,50 @@ namespace Wrj.ProcessEnforcerTray
                 notifyIcon.Visible = false;
             }
         }
+        private void LoadLauncherFile(string path, bool isAlt)
+        {
+            if (!File.Exists(path))
+            {
+                // Try BaseDirectory
+                if (File.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, path)))
+                {
+                    path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, path);
+                }
+            }
+            if (File.Exists(path) && Path.GetExtension(path).Equals(".txt", StringComparison.OrdinalIgnoreCase))
+            {
+                persistPath = path;
+            }
+            else
+            {
+                Logging.Log($"Invalid file path provided: {path}");
+                return;
+            }
 
+            persistPath = Path.GetFullPath(path);
+            if (isAlt)
+            {
+                Logging.Log($"Alternative path provided: {persistPath}");
+                isUsingAlternativePath = true;
+                enforceOrder = true;
+            }
+            string[] lines = File.ReadAllLines(persistPath);
+            ParseProcessPaths(lines);
+        }
+
+        public static void StartUdpServer(IPAddress address, int port)
+        {
+            UdpAddress = address;
+            UdpPort = port;
+            try
+            {
+                udpServer.Server(address, port);
+            }
+            catch (Exception ex)
+            {
+                Logging.Log($"Error starting UDP server: {ex.Message}");
+            }
+        }
         private void StartTimer()
         {
             if (timer == null || !timer.Enabled)
@@ -553,6 +699,25 @@ namespace Wrj.ProcessEnforcerTray
 
             e.Cancel = true; // Prevent the column width from changing
             e.NewWidth = processListView.Columns[e.ColumnIndex].Width; // Keep the current width
+        }
+
+        private void loadLaunchFileToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            IsEditing = true;
+            StopTimer();
+            fileDialog.InitialDirectory = initBrowseDir;
+            fileDialog.Filter = "txt files (*.txt)|*.txt";
+            if (fileDialog.ShowDialog() == DialogResult.OK)
+            {
+                initBrowseDir = Path.GetDirectoryName(fileDialog.FileName);
+                LoadLauncherFile(fileDialog.FileName, true);
+            }
+        }
+
+        private void uDPToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            UdpSettingsForm udpSettingsForm = new UdpSettingsForm();
+            udpSettingsForm.ShowDialog();
         }
     }
 }

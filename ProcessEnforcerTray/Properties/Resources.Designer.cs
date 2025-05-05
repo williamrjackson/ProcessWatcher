@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Wrj.ProcessEnforcerTray.Properties {
+namespace ProcessEnforcerTray.Properties {
     using System;
     
     
